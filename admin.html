@@ -10,6 +10,24 @@
 <helmet>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="./firebase-msf.js"></script>
+<script>
+  (function () {
+    window.__msfEmailjsServiceId = 'service_8jhj6ab';
+    window.__msfEmailjsTemplateId = 'template_a0vwu2h';
+    window.__msfEmailjsPublicKey = '7yFiDa-eqAoONQJLs';
+    function init() {
+      if (!window.emailjs || window.__msfEmailjsConfigured) return;
+      window.emailjs.init({ publicKey: window.__msfEmailjsPublicKey });
+      window.__msfEmailjsConfigured = true;
+    }
+    if (window.emailjs) { init(); return; }
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+    s.onload = init;
+    document.head.appendChild(s);
+  })();
+</script>
 <style>
   *, *::before, *::after { box-sizing: border-box; }
   body { margin: 0; font-family: 'Open Sans', sans-serif; background: #f4f4f5; color: #1a1a1a; }
@@ -96,18 +114,35 @@
           <div style="display:flex;background:#fff;border:1px solid #e2e2e2;">
             <div onClick="{{ tabQuotes }}" style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:12px 22px;cursor:pointer;color:{{ quotesTabColor }};background:{{ quotesTabBg }};">Presupuestos</div>
             <div onClick="{{ tabClients }}" style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:12px 22px;cursor:pointer;color:{{ clientsTabColor }};background:{{ clientsTabBg }};">Clientes</div>
+            <div onClick="{{ tabProducts }}" style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:12px 22px;cursor:pointer;color:{{ productsTabColor }};background:{{ productsTabBg }};">Productos</div>
+            <div onClick="{{ tabSettings }}" style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:12px 22px;cursor:pointer;color:{{ settingsTabColor }};background:{{ settingsTabBg }};">Ajustes</div>
           </div>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e2e2e2;padding:0 14px;">
-              <i class="ti ti-search" style="color:#aaa;font-size:16px;"></i>
-              <input id="adminSearch" type="text" placeholder="Buscar..." onInput="{{ onSearch }}" style="border:none;outline:none;padding:11px 0;font-family:'Open Sans',sans-serif;font-size:14px;width:200px;background:transparent;">
+          <sc-if value="{{ showSearchBar }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e2e2e2;padding:0 14px;">
+                <i class="ti ti-search" style="color:#aaa;font-size:16px;"></i>
+                <input id="adminSearch" type="text" placeholder="Buscar..." onInput="{{ onSearch }}" style="border:none;outline:none;padding:11px 0;font-family:'Open Sans',sans-serif;font-size:14px;width:200px;background:transparent;">
+              </div>
+              <sc-if value="{{ showProductActions }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ toggleAddProduct }}" style="background:#C8102E;border:none;color:#fff;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:11px 14px;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;display:flex;align-items:center;gap:6px;" style-hover="background:#9e0c23;"><i class="ti ti-plus"></i> Nuevo producto</button>
+                <sc-if value="{{ showMigrate }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ migrateCatalog }}" style="background:#fff;border:1px solid #e2e2e2;color:#666;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:11px 14px;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;display:flex;align-items:center;gap:6px;" style-hover="border-color:#C8102E;color:#C8102E;"><i class="ti ti-database-plus"></i> Cargar catálogo actual</button>
+                </sc-if>
+              </sc-if>
+              <sc-if value="{{ showSeedDemo }}" hint-placeholder-val="{{ true }}">
+                <button onClick="{{ seedDemo }}" style="background:#fff;border:1px solid #e2e2e2;color:#666;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:11px 14px;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;display:flex;align-items:center;gap:6px;" style-hover="border-color:#C8102E;color:#C8102E;"><i class="ti ti-database-plus"></i> Datos demo</button>
+              </sc-if>
             </div>
-            <button onClick="{{ seedDemo }}" style="background:#fff;border:1px solid #e2e2e2;color:#666;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:11px 14px;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;display:flex;align-items:center;gap:6px;" style-hover="border-color:#C8102E;color:#C8102E;"><i class="ti ti-database-plus"></i> Datos demo</button>
-          </div>
+          </sc-if>
         </div>
 
         <!-- QUOTES TABLE -->
         <sc-if value="{{ showQuotes }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+            <sc-for list="{{ statusFilters }}" as="sf" hint-placeholder-count="4">
+              <button onClick="{{ sf.onClick }}" style="background:{{ sf.bg }};color:{{ sf.color }};border:1px solid {{ sf.border }};font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.03em;padding:9px 16px;cursor:pointer;">{{ sf.label }}</button>
+            </sc-for>
+          </div>
           <div class="msf-tbl-wrap" style="background:#fff;border:1px solid #e2e2e2;overflow-x:auto;">
             <sc-if value="{{ hasQuotes }}" hint-placeholder-val="{{ true }}">
               <table style="width:100%;border-collapse:collapse;min-width:820px;">
@@ -166,11 +201,13 @@
                     <th style="text-align:left;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Email</th>
                     <th style="text-align:left;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">WhatsApp</th>
                     <th style="text-align:center;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Pedidos</th>
+                    <th style="text-align:center;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Estado</th>
+                    <th style="text-align:center;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Acción</th>
                   </tr>
                 </thead>
                 <tbody>
                   <sc-for list="{{ clientRows }}" as="c" hint-placeholder-count="4">
-                    <tr style="border-bottom:1px solid #eee;" style-hover="background:#fafafa;">
+                    <tr style="border-bottom:1px solid #eee;opacity:{{ c.rowOpacity }};" style-hover="background:#fafafa;">
                       <td style="padding:14px 18px;">
                         <div style="display:flex;align-items:center;gap:10px;">
                           <div style="width:34px;height:34px;background:#0a0a0a;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;flex-shrink:0;">{{ c.initial }}</div>
@@ -181,6 +218,10 @@
                       <td style="padding:14px 18px;font-size:13px;color:#555;">{{ c.email }}</td>
                       <td style="padding:14px 18px;font-size:13px;color:#555;">{{ c.tel }}</td>
                       <td style="padding:14px 18px;text-align:center;"><span style="font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:#fff;background:#C8102E;padding:3px 11px;">{{ c.pedidos }}</span></td>
+                      <td style="padding:14px 18px;text-align:center;"><span style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:{{ c.estadoColor }};border:1px solid {{ c.estadoColor }};padding:4px 10px;">{{ c.estadoLabel }}</span></td>
+                      <td style="padding:14px 18px;text-align:center;">
+                        <button onClick="{{ c.onToggle }}" style="background:{{ c.btnBg }};color:{{ c.btnColor }};border:1px solid {{ c.btnBorder }};font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:8px 14px;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;">{{ c.btnLabel }}</button>
+                      </td>
                     </tr>
                   </sc-for>
                 </tbody>
@@ -196,7 +237,214 @@
           </div>
         </sc-if>
 
-        <div style="margin-top:18px;font-size:11.5px;color:#aaa;display:flex;align-items:center;gap:7px;line-height:1.5;"><i class="ti ti-info-circle" style="font-size:14px;"></i> Datos almacenados localmente en este navegador (prototipo). Para centralizar la base entre dispositivos, conectar un backend.</div>
+        <!-- PRODUCTS -->
+        <sc-if value="{{ showProducts }}" hint-placeholder-val="{{ false }}">
+          <sc-if value="{{ showAddProductForm }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#fff;border:1px solid #e2e2e2;border-top:3px solid #C8102E;padding:22px;margin-bottom:18px;">
+              <div style="font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;color:#0a0a0a;text-transform:uppercase;letter-spacing:.04em;margin-bottom:16px;">{{ productFormTitle }}</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                <div>
+                  <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Categoría</label>
+                  <select id="pfCategory" defaultValue="{{ pfCategoryVal }}" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;background:#fff;">
+                    <sc-for list="{{ categoryOptions }}" as="cat" hint-placeholder-count="5">
+                      <option value="{{ cat.id }}">{{ cat.name }}</option>
+                    </sc-for>
+                  </select>
+                </div>
+                <div>
+                  <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Nombre del producto</label>
+                  <input id="pfName" type="text" defaultValue="{{ pfNameVal }}" placeholder="Ej: MONTANTE 70×35" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;" style-focus="border-color:#C8102E;">
+                </div>
+                <div style="grid-column:1 / -1;">
+                  <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Especificación</label>
+                  <input id="pfSpec" type="text" defaultValue="{{ pfSpecVal }}" placeholder="Ej: Galvanizado · 3 mts · Espesor 0.5mm" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;" style-focus="border-color:#C8102E;">
+                </div>
+                <div>
+                  <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Precio ($)</label>
+                  <input id="pfPrice" type="number" defaultValue="{{ pfPriceVal }}" placeholder="3200" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;" style-focus="border-color:#C8102E;">
+                </div>
+                <div>
+                  <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Etiqueta (opcional)</label>
+                  <input id="pfBadge" type="text" defaultValue="{{ pfBadgeVal }}" placeholder="Ej: Stock" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;" style-focus="border-color:#C8102E;">
+                </div>
+                <div style="grid-column:1 / -1;">
+                  <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">URL de la foto</label>
+                  <input id="pfImg" type="text" defaultValue="{{ pfImgVal }}" placeholder="https://..." style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;" style-focus="border-color:#C8102E;">
+                  <div style="font-size:11.5px;color:#aaa;margin-top:6px;">Pegá el link de una foto ya subida (por ejemplo desde el celular a Google Fotos / Drive con acceso público, o cualquier link directo a la imagen).</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:10px;margin-top:18px;">
+                <button onClick="{{ saveProduct }}" style="background:#C8102E;color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;padding:13px 22px;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;" style-hover="background:#9e0c23;">Guardar producto</button>
+                <button onClick="{{ cancelProductForm }}" style="background:#fff;color:#666;border:1px solid #d8d8d8;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;padding:13px 22px;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;">Cancelar</button>
+              </div>
+            </div>
+          </sc-if>
+
+          <div class="msf-tbl-wrap" style="background:#fff;border:1px solid #e2e2e2;overflow-x:auto;">
+            <sc-if value="{{ hasProducts }}" hint-placeholder-val="{{ true }}">
+              <table style="width:100%;border-collapse:collapse;min-width:820px;">
+                <thead>
+                  <tr style="background:#0a0a0a;">
+                    <th style="text-align:left;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Foto</th>
+                    <th style="text-align:left;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Producto</th>
+                    <th style="text-align:left;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Categoría</th>
+                    <th style="text-align:right;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Precio</th>
+                    <th style="text-align:center;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Estado</th>
+                    <th style="text-align:right;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ productRows }}" as="p" hint-placeholder-count="6">
+                    <tr style="border-bottom:1px solid #eee;opacity:{{ p.rowOpacity }};" style-hover="background:#fafafa;">
+                      <td style="padding:10px 18px;">
+                        <sc-if value="{{ p.img }}" hint-placeholder-val="{{ false }}">
+                          <img src="{{ p.img }}" loading="lazy" style="width:44px;height:44px;object-fit:cover;background:#f0f0f0;display:block;">
+                        </sc-if>
+                        <sc-if value="{{ p.noImg }}" hint-placeholder-val="{{ true }}">
+                          <div style="width:44px;height:44px;background:#f0f0f0;"></div>
+                        </sc-if>
+                      </td>
+                      <td style="padding:14px 18px;">
+                        <div style="font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:#0a0a0a;">{{ p.name }}</div>
+                        <div style="font-size:12px;color:#999;">{{ p.spec }}</div>
+                      </td>
+                      <td style="padding:14px 18px;font-size:13px;color:#555;">{{ p.categoryName }}</td>
+                      <td style="padding:14px 18px;text-align:right;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;color:#0a0a0a;white-space:nowrap;">{{ p.priceFmt }}</td>
+                      <td style="padding:14px 18px;text-align:center;"><span onClick="{{ p.onToggle }}" style="cursor:pointer;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:{{ p.estadoColor }};border:1px solid {{ p.estadoColor }};padding:4px 10px;">{{ p.estadoLabel }}</span></td>
+                      <td style="padding:14px 18px;text-align:right;white-space:nowrap;">
+                        <button onClick="{{ p.onEdit }}" style="background:#fff;border:1px solid #d8d8d8;color:#666;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:7px 12px;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;margin-right:6px;" style-hover="border-color:#0a0a0a;color:#0a0a0a;">Editar</button>
+                        <button onClick="{{ p.onDelete }}" style="background:#fff;border:1px solid #d8d8d8;color:#C8102E;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:7px 12px;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;" style-hover="border-color:#C8102E;background:#C8102E;color:#fff;">Eliminar</button>
+                      </td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </sc-if>
+            <sc-if value="{{ noProducts }}" hint-placeholder-val="{{ false }}">
+              <div style="text-align:center;padding:70px 20px;color:#bbb;">
+                <i class="ti ti-package" style="font-size:48px;color:#e0e0e0;"></i>
+                <div style="font-size:14px;margin-top:14px;line-height:1.6;">No hay productos cargados en la base todavía.<br>El sitio muestra el catálogo de ejemplo mientras tanto.</div>
+                <button onClick="{{ migrateCatalog }}" style="margin-top:18px;background:#0a0a0a;color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:11px 20px;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;">Cargar catálogo de ejemplo como base</button>
+              </div>
+            </sc-if>
+          </div>
+          <div style="margin-top:14px;font-size:11.5px;color:#aaa;line-height:1.5;">Los cambios se ven al instante en el sitio, en cualquier PC o celular — sin tener que volver a publicar nada.</div>
+        </sc-if>
+
+        <!-- SETTINGS -->
+        <sc-if value="{{ showSettings }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#fff;border:1px solid #e2e2e2;max-width:640px;">
+            <div style="background:#0a0a0a;padding:20px 26px;border-bottom:3px solid #C8102E;">
+              <div style="font-family:'Montserrat',sans-serif;font-size:14px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.04em;">Ajustes del sitio</div>
+              <div style="font-size:12px;color:rgba(255,255,255,.5);font-weight:300;margin-top:3px;">Estos cambios afectan al sitio público en este navegador.</div>
+            </div>
+            <div style="padding:26px;display:flex;flex-direction:column;gap:22px;">
+              <div>
+                <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">WhatsApp de pedidos y presupuestos</label>
+                <div style="font-size:12.5px;color:#999;margin:5px 0 12px;line-height:1.5;">Números a los que llegan las consultas y pedidos. Activá los que quieras que reciban.</div>
+
+                <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;">
+                  <div onClick="{{ toggleWa1 }}" style="width:44px;height:26px;background:{{ wa1ToggleBg }};border-radius:16px;position:relative;cursor:pointer;flex-shrink:0;transition:background .2s;">
+                    <div style="width:20px;height:20px;background:#fff;border-radius:50%;position:absolute;top:3px;left:{{ wa1KnobLeft }};transition:left .2s;"></div>
+                  </div>
+                  <input id="settingsWA1" type="tel" defaultValue="{{ wa1Input }}" placeholder="54 9 11 2345 6789 (Celular 1)" style="flex:1;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;" style-focus="border-color:#C8102E;">
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;">
+                  <div onClick="{{ toggleWa2 }}" style="width:44px;height:26px;background:{{ wa2ToggleBg }};border-radius:16px;position:relative;cursor:pointer;flex-shrink:0;transition:background .2s;">
+                    <div style="width:20px;height:20px;background:#fff;border-radius:50%;position:absolute;top:3px;left:{{ wa2KnobLeft }};transition:left .2s;"></div>
+                  </div>
+                  <input id="settingsWA2" type="tel" defaultValue="{{ wa2Input }}" placeholder="54 9 11 2345 6789 (Celular 2)" style="flex:1;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;" style-focus="border-color:#C8102E;">
+                </div>
+
+                <button onClick="{{ saveSettings }}" style="background:#C8102E;color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;padding:13px 22px;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;width:100%;" style-hover="background:#9e0c23;">Guardar</button>
+                <sc-if value="{{ settingsSaved }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size:12px;color:#1a7a3a;margin-top:8px;display:flex;align-items:center;gap:6px;"><i class="ti ti-circle-check"></i> Guardado. Ya se aplica en el sitio.</div>
+                </sc-if>
+              </div>
+              <div style="border-top:1px solid #eee;padding-top:20px;font-size:11.5px;color:#aaa;line-height:1.6;">
+                Con los dos activados, cada consulta por WhatsApp se abre para enviar a ambos celulares al mismo tiempo. Apagá uno para que ese celular deje de recibir.
+              </div>
+            </div>
+          </div>
+
+          <div style="background:#fff;border:1px solid #e2e2e2;max-width:640px;margin-top:20px;">
+            <div style="background:#0a0a0a;padding:20px 26px;border-bottom:3px solid #C8102E;">
+              <div style="font-family:'Montserrat',sans-serif;font-size:14px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.04em;display:flex;align-items:center;gap:8px;"><i class="ti ti-mail-forward" style="color:#C8102E;"></i> Respaldo automático por email</div>
+              <div style="font-size:12px;color:rgba(255,255,255,.5);font-weight:300;margin-top:3px;">Además del respaldo diario en la nube, se puede enviar una copia por email a una casilla exclusiva para esto.</div>
+            </div>
+            <div style="padding:26px;display:flex;flex-direction:column;gap:18px;">
+              <div>
+                <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Email de respaldo</label>
+                <input id="backupEmail" type="email" value="{{ backupEmailInput }}" onInput="{{ onBackupEmailChange }}" placeholder="respaldos-msf@ejemplo.com" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;" style-focus="border-color:#C8102E;">
+              </div>
+              <div style="display:flex;gap:14px;flex-wrap:wrap;">
+                <div style="flex:1;min-width:160px;">
+                  <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Frecuencia</label>
+                  <select id="backupFreq" value="{{ backupFreqInput }}" onChange="{{ onBackupFreqChange }}" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;background:#fff;">
+                    <option value="daily">Diario</option>
+                    <option value="weekly">Semanal</option>
+                    <option value="monthly">Mensual</option>
+                  </select>
+                </div>
+                <div style="flex:1;min-width:140px;">
+                  <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Horario</label>
+                  <select id="backupHour" value="{{ backupHourInput }}" onChange="{{ onBackupHourChange }}" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;background:#fff;">
+                    <sc-for list="{{ hourOptions }}" as="h" hint-placeholder-count="24">
+                      <option value="{{ h.value }}">{{ h.label }}</option>
+                    </sc-for>
+                  </select>
+                </div>
+              </div>
+              <button onClick="{{ saveBackupSettings }}" style="background:#C8102E;color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;padding:13px;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;" style-hover="background:#9e0c23;">Guardar</button>
+              <div style="font-size:12.5px;color:#999;line-height:1.6;">{{ backupStatusText }}</div>
+              <sc-if value="{{ backupSettingsSaved }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size:12px;color:#1a7a3a;display:flex;align-items:center;gap:6px;"><i class="ti ti-circle-check"></i> Guardado.</div>
+              </sc-if>
+            </div>
+          </div>
+
+          <div style="background:#fff;border:1px solid #e2e2e2;max-width:640px;margin-top:20px;">
+            <div style="background:#0a0a0a;padding:20px 26px;border-bottom:3px solid #C8102E;">
+              <div style="font-family:'Montserrat',sans-serif;font-size:14px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.04em;display:flex;align-items:center;gap:8px;"><i class="ti ti-clock-hour-4" style="color:#C8102E;"></i> Respaldos automáticos diarios</div>
+              <div style="font-size:12px;color:rgba(255,255,255,.5);font-weight:300;margin-top:3px;">Se guardan solos, un día tras otro, sin que hagas nada. Se conservan los últimos 14 días.</div>
+            </div>
+            <div style="padding:10px 26px 22px;">
+              <sc-if value="{{ hasSnapshots }}" hint-placeholder-val="{{ true }}">
+                <sc-for list="{{ snapshotRows }}" as="sn" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid #f0f0f0;">
+                    <div>
+                      <div style="font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:#0a0a0a;">{{ sn.fecha }}</div>
+                      <div style="font-size:12px;color:#999;">{{ sn.resumen }}</div>
+                    </div>
+                    <button onClick="{{ sn.onRestore }}" style="background:#fff;border:1px solid #0a0a0a;color:#0a0a0a;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:8px 14px;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;" style-hover="background:#0a0a0a;color:#fff;">Restaurar</button>
+                  </div>
+                </sc-for>
+              </sc-if>
+              <sc-if value="{{ noSnapshots }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size:12.5px;color:#aaa;padding:14px 0;">Todavía no hay respaldos automáticos guardados (se crean apenas haya datos en la base).</div>
+              </sc-if>
+              <sc-if value="{{ hasPrerestore }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:14px;padding-top:14px;border-top:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+                  <div style="font-size:12px;color:#999;">¿Restauraste algo por error?</div>
+                  <button onClick="{{ undoLastRestore }}" style="background:#fff;border:1px solid #C8102E;color:#C8102E;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:9px 14px;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;display:flex;align-items:center;gap:6px;" style-hover="background:#C8102E;color:#fff;"><i class="ti ti-arrow-back-up"></i> Deshacer última restauración</button>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+
+          <div style="background:#fff;border:1px solid #e2e2e2;max-width:640px;margin-top:20px;">
+            <div style="background:#0a0a0a;padding:20px 26px;border-bottom:3px solid #C8102E;">
+              <div style="font-family:'Montserrat',sans-serif;font-size:14px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.04em;display:flex;align-items:center;gap:8px;"><i class="ti ti-shield-lock" style="color:#C8102E;"></i> Archivo histórico de pedidos</div>
+              <div style="font-size:12px;color:rgba(255,255,255,.5);font-weight:300;margin-top:3px;">Cada pedido que entra queda guardado acá para siempre, aunque después se restaure un respaldo viejo.</div>
+            </div>
+            <div style="padding:22px 26px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+              <div style="font-size:13px;color:#555;">Pedidos guardados en el archivo: <strong style="color:#0a0a0a;">{{ archiveCount }}</strong></div>
+              <button onClick="{{ recoverQuotesFromArchive }}" style="background:#0a0a0a;color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:11px 16px;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;display:flex;align-items:center;gap:7px;" style-hover="background:#1a1a1a;"><i class="ti ti-refresh-dot"></i> Recuperar pedidos faltantes</button>
+            </div>
+          </div>
+        </sc-if>
+
+        <div style="margin-top:18px;font-size:11.5px;color:#aaa;display:flex;align-items:center;gap:7px;line-height:1.5;"><i class="ti ti-cloud-check" style="font-size:14px;color:#1a7a3a;"></i> Base de datos compartida en la nube (Firestore) — se ve igual desde cualquier PC o celular.</div>
       </div>
     </div>
   </sc-if>
@@ -215,17 +463,303 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { authed: false, loginError: '', tab: 'quotes', search: '', clients: [], quotes: [], tick: 0 };
-
-  LS = { clients: 'msf_clients_v1', session: 'msf_session_v1', quotes: 'msf_quotes_v1', admin: 'msf_admin_session_v1' };
+  LS = { admin: 'msf_admin_session_v1' }; // solo la sesión de admin queda local; todo lo demás vive en Firestore
   PASS = 'msf2026';
 
-  loadJSON(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch (e) { return []; } }
-  load() { this.setState({ clients: this.loadJSON(this.LS.clients), quotes: this.loadJSON(this.LS.quotes) }); }
+  state = {
+    authed: localStorage.getItem('msf_admin_session_v1') === '1',
+    loginError: '', tab: 'quotes', search: '',
+    clients: [], quotes: [], settings: {}, snapshots: [], products: [],
+    settingsSaved: false, backupMsg: '', backupOk: true, backupSettingsSaved: false, tick: 0,
+    backupEmailDraft: null, backupFreqDraft: null, backupHourDraft: null,
+    productFormOpen: false, editingProductId: null,
+  };
+
+  CATEGORIES = [
+    { id: 'perfiles', name: 'Perfiles' },
+    { id: 'placas', name: 'Placas' },
+    { id: 'membrana', name: 'Membrana' },
+    { id: 'tornilleria', name: 'Tornillería' },
+    { id: 'aislantes', name: 'Aislantes' },
+  ];
+
+  // Catálogo actual del sitio (el mismo que ya ven los clientes), para poder migrarlo
+  // a la base con un clic y seguir editándolo desde acá.
+  CURRENT_CATALOG = [
+    { category: 'perfiles', name: 'MONTANTE 70×35', spec: 'Galvanizado · 3 mts · Espesor 0.5mm · Alma 70mm', price: 3200, badge: 'Stock', img: 'https://images.unsplash.com/photo-1768321903410-54961e343b71?auto=format&fit=crop&w=700&q=72' },
+    { category: 'perfiles', name: 'MONTANTE 100×50', spec: 'Galvanizado · 3 mts · Espesor 0.5mm · Alma 100mm', price: 4800, badge: null, img: 'https://images.unsplash.com/photo-1768321917129-80494daec0e9?auto=format&fit=crop&w=700&q=72' },
+    { category: 'perfiles', name: 'SOLERA 70×25', spec: 'Galvanizada · 3 mts · Ala 25mm · Terminación Z275', price: 2100, badge: 'Stock', img: 'https://images.unsplash.com/photo-1768321903410-54961e343b71?auto=format&fit=crop&w=700&q=72' },
+    { category: 'perfiles', name: 'SOLERA 100×25', spec: 'Galvanizada · 3 mts · Ala 25mm · Terminación Z275', price: 2900, badge: null, img: 'https://images.unsplash.com/photo-1768321917129-80494daec0e9?auto=format&fit=crop&w=700&q=72' },
+    { category: 'placas', name: 'DURLOCK 9.5MM', spec: 'Standard · 1.20×2.40 m · Borde afinado · Ignífuga', price: 18500, badge: 'Stock', img: 'https://images.unsplash.com/photo-1768321902331-7d21aa3faf5a?auto=format&fit=crop&w=700&q=72' },
+    { category: 'placas', name: 'DURLOCK 12.5MM', spec: 'Standard · 1.20×2.40 m · Borde afinado · Ignífuga', price: 21000, badge: 'Stock', img: 'https://images.unsplash.com/photo-1768321917995-2d992c50854b?auto=format&fit=crop&w=700&q=72' },
+    { category: 'placas', name: 'OSB 11MM', spec: 'Estructural · 1.22×2.44 m · Machihembrado · Exterior', price: 32000, badge: null, img: 'https://images.unsplash.com/photo-1595514535215-8f0a3e2e5c95?auto=format&fit=crop&w=700&q=72' },
+    { category: 'placas', name: 'PLACA RH', spec: 'Resistente a la humedad · 1.20×2.40 m · Color verde', price: 26000, badge: null, img: 'https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&w=700&q=72' },
+    { category: 'membrana', name: 'TYVEK', spec: 'Hidrófuga transpirable · rollo 50m² · Marca Dupont', price: 28000, badge: 'Stock', img: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=700&q=72' },
+    { category: 'membrana', name: 'MEMBRANA FOIL', spec: 'Kraft aluminizada · rollo 50m² · Barrera radiante', price: 14500, badge: null, img: 'https://images.unsplash.com/photo-1509644851169-2acc08aa25b5?auto=format&fit=crop&w=700&q=72' },
+    { category: 'membrana', name: 'BARRERA DE VAPOR', spec: 'Polietileno · rollo 50m² · 200 micrones', price: 12000, badge: null, img: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=700&q=72' },
+    { category: 'tornilleria', name: 'AUTOPERFORANTE AGUJA', spec: 'Punta aguja · 25mm · Pack ×500 · Fosfatizado', price: 4200, badge: 'Stock', img: 'https://images.unsplash.com/photo-1426927308491-6380b6a9936f?auto=format&fit=crop&w=700&q=72' },
+    { category: 'tornilleria', name: 'WAFER HEAD 6×25MM', spec: 'Cabeza wafer · 6×25mm · Pack ×500 · Zincado', price: 3800, badge: null, img: 'https://images.unsplash.com/photo-1614963326505-843797d0e2be?auto=format&fit=crop&w=700&q=72' },
+    { category: 'tornilleria', name: 'TACO FISCHER 6MM', spec: 'Nylon · 6mm · Pack ×100 · Uso general', price: 2200, badge: null, img: 'https://images.unsplash.com/photo-1591129841117-3adfd313e34f?auto=format&fit=crop&w=700&q=72' },
+    { category: 'aislantes', name: 'LANA DE VIDRIO 50MM', spec: 'Densidad 11kg/m³ · Rollo 15m² · Aislación térmica', price: 18000, badge: 'Stock', img: 'https://images.unsplash.com/photo-1768321916948-187505429cfa?auto=format&fit=crop&w=700&q=72' },
+    { category: 'aislantes', name: 'LANA DE ROCA 40MM', spec: 'Densidad 40kg/m³ · Rollo 10m² · Ignífuga clase A1', price: 22000, badge: null, img: 'https://images.unsplash.com/photo-1768321916128-c242ca443253?auto=format&fit=crop&w=700&q=72' },
+    { category: 'aislantes', name: 'POLIESTIRENO 20MM', spec: 'Expandido · Placa 1.20×0.60m · Aislante térmico', price: 4500, badge: null, img: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?auto=format&fit=crop&w=700&q=72' },
+  ];
+
+  waitForDb() {
+    return new Promise(resolve => {
+      if (window.__msfDb) { resolve(window.__msfDb); return; }
+      window.addEventListener('msf-firebase-ready', () => resolve(window.__msfDb), { once: true });
+    });
+  }
+  async getDb() {
+    if (!this._dbPromise) this._dbPromise = this.waitForDb();
+    return this._dbPromise;
+  }
+
+  // Suscripciones en tiempo real: cualquier cambio hecho desde OTRA PC se refleja acá al instante.
+  async attachListeners() {
+    const db = await this.getDb();
+    db.collection('clients').onSnapshot(snap => {
+      this.setState({ clients: snap.docs.map(d => d.data()) });
+    });
+    db.collection('quotes').onSnapshot(snap => {
+      const quotes = snap.docs.map(d => d.data());
+      this.setState({ quotes });
+      this.autoSnapshotIfNeeded(quotes, this.state.clients);
+      this.maybeSendScheduledBackup(this.state.settings, this.state.clients, quotes);
+    });
+    db.collection('settings').doc('main').onSnapshot(doc => {
+      const settings = doc.exists ? doc.data() : {};
+      this.setState({ settings });
+      this.maybeSendScheduledBackup(settings, this.state.clients, this.state.quotes);
+    });
+    db.collection('snapshots').onSnapshot(snap => {
+      const rows = snap.docs.filter(d => d.id !== 'prerestore').map(d => ({ id: d.id, ...d.data() })).sort((a, b) => b.id.localeCompare(a.id));
+      this.setState({ snapshots: rows });
+    });
+    db.collection('snapshots').doc('prerestore').onSnapshot(doc => {
+      this.setState({ hasPrerestoreDoc: doc.exists });
+    });
+    db.collection('products').onSnapshot(snap => {
+      this.setState({ products: snap.docs.map(d => d.data()) });
+    });
+  }
+
+  // ---- Productos: alta / edición / baja / eliminación ----
+  toggleAddProduct = () => this.setState(s => ({
+    productFormOpen: !s.productFormOpen, editingProductId: null,
+  }));
+
+  cancelProductForm = () => this.setState({ productFormOpen: false, editingProductId: null });
+
+  editProduct = (p) => this.setState({ productFormOpen: true, editingProductId: p.id });
+
+  saveProduct = async () => {
+    const category = this.val('pfCategory') || this.CATEGORIES[0].id;
+    const name = this.val('pfName');
+    const spec = this.val('pfSpec');
+    const price = parseFloat(this.val('pfPrice')) || 0;
+    const badge = this.val('pfBadge');
+    const img = this.val('pfImg');
+    if (!name || !img) {
+      this.setState({ backupMsg: 'Falta el nombre o la foto del producto.', backupOk: false });
+      clearTimeout(this._backupT);
+      this._backupT = setTimeout(() => this.setState({ backupMsg: '' }), 4000);
+      return;
+    }
+    const db = await this.getDb();
+    const id = this.state.editingProductId || ('p' + Date.now());
+    await db.collection('products').doc(id).set({
+      id, category, name, spec, price, badge: badge || null, img, active: true,
+    }, { merge: true });
+    this.setState({ productFormOpen: false, editingProductId: null });
+  };
+
+  toggleProductActive = async (p) => {
+    const db = await this.getDb();
+    await db.collection('products').doc(p.id).update({ active: p.active === false ? true : false });
+  };
+
+  deleteProduct = async (p) => {
+    if (!window.confirm(`¿Eliminar "${p.name}" del catálogo? Esta acción no se puede deshacer.`)) return;
+    const db = await this.getDb();
+    await db.collection('products').doc(p.id).delete();
+  };
+
+  // Trae el catálogo que ya ven los clientes hoy y lo carga en la base para poder editarlo desde acá.
+  migrateCatalog = async () => {
+    const db = await this.getDb();
+    const batch = db.batch();
+    this.CURRENT_CATALOG.forEach((p, i) => {
+      const id = 'cat' + i;
+      batch.set(db.collection('products').doc(id), { ...p, id, active: true });
+    });
+    await batch.commit();
+  };
+
+  // Respaldo diario automático en la nube: una copia fechada de toda la base, una vez por día,
+  // sin acción del usuario. Nunca guarda un día "vacío". Se conservan los últimos 14 días.
+  autoSnapshotIfNeeded(quotes, clients) {
+    if ((!quotes || !quotes.length) && (!clients || !clients.length)) return;
+    const today = new Date().toISOString().slice(0, 10);
+    if (this._snapshotDoneFor === today) return;
+    this._snapshotDoneFor = today;
+    this.getDb().then(db => {
+      db.collection('snapshots').doc(today).set({
+        clients: clients || this.state.clients,
+        quotes: quotes || this.state.quotes,
+        settings: this.state.settings || {},
+        savedAt: new Date().toISOString(),
+      });
+      // limpiar respaldos de más de 14 días
+      db.collection('snapshots').get().then(snap => {
+        snap.docs.forEach(d => {
+          if (d.id === 'prerestore') return;
+          if ((Date.now() - new Date(d.id).getTime()) > 14 * 86400000) db.collection('snapshots').doc(d.id).delete();
+        });
+      });
+    });
+  }
+
+  hasPrerestore() { return !!this.state.hasPrerestoreDoc; }
+
+  restoreSnapshot = async (id, snapData) => {
+    const nClients = (snapData.clients || []).length, nQuotes = (snapData.quotes || []).length;
+    const ok = window.confirm(
+      `¿Restaurar el respaldo del ${id}?\n\nVa a reemplazar la base actual (${this.state.clients.length} clientes, ${this.state.quotes.length} pedidos) por esta copia: ${nClients} clientes, ${nQuotes} pedidos.\n\nSe guarda automáticamente una copia de seguridad de lo actual antes de reemplazar, por si hace falta deshacer.`
+    );
+    if (!ok) return;
+    const db = await this.getDb();
+    // copia de "justo antes de restaurar", para poder deshacer
+    await db.collection('snapshots').doc('prerestore').set({
+      clients: this.state.clients, quotes: this.state.quotes, settings: this.state.settings, savedAt: new Date().toISOString(),
+    });
+    const batch = db.batch();
+    (snapData.clients || []).forEach(c => batch.set(db.collection('clients').doc(c.id), c));
+    (snapData.quotes || []).forEach(q => batch.set(db.collection('quotes').doc(q.id), q));
+    if (snapData.settings) batch.set(db.collection('settings').doc('main'), snapData.settings);
+    await batch.commit();
+    this.setState({ backupMsg: 'Base restaurada desde el respaldo del ' + id + '. (Se guardó una copia de lo anterior por si querés deshacer.)', backupOk: true });
+    clearTimeout(this._backupT);
+    this._backupT = setTimeout(() => this.setState({ backupMsg: '' }), 6000);
+  };
+
+  undoLastRestore = async () => {
+    const db = await this.getDb();
+    const doc = await db.collection('snapshots').doc('prerestore').get();
+    if (!doc.exists) return;
+    this.restoreSnapshot('anterior', doc.data());
+  };
+
+  recoverQuotesFromArchive = async () => {
+    // El archivo histórico son los propios documentos de "quotes": nunca se eliminan desde la UI,
+    // así que este botón vuelve a traer del último respaldo cualquier pedido que falte.
+    const db = await this.getDb();
+    const snaps = await db.collection('snapshots').get();
+    const byId = {};
+    this.state.quotes.forEach(q => byId[q.id] = q);
+    let added = 0;
+    snaps.docs.forEach(d => {
+      if (d.id === 'prerestore') return;
+      (d.data().quotes || []).forEach(q => { if (!byId[q.id]) { byId[q.id] = q; added++; } });
+    });
+    if (added > 0) {
+      const batch = db.batch();
+      Object.values(byId).forEach(q => batch.set(db.collection('quotes').doc(q.id), q));
+      await batch.commit();
+    }
+    this.setState({ backupMsg: added > 0 ? `Se recuperaron ${added} pedido(s) de los respaldos.` : 'No faltaba ningún pedido: ya estaban todos.', backupOk: true });
+    clearTimeout(this._backupT);
+    this._backupT = setTimeout(() => this.setState({ backupMsg: '' }), 5000);
+  };
+
+  toggleClient = async (c) => {
+    const db = await this.getDb();
+    await db.collection('clients').doc(c.id).update({ activo: c.activo === false ? true : false });
+  };
+
+  // ---- Respaldo automático por email (diario / semanal / mensual) ----
+  onBackupEmailChange = (e) => this.setState({ backupEmailDraft: e.target.value });
+  onBackupFreqChange = (e) => this.setState({ backupFreqDraft: e.target.value });
+  onBackupHourChange = (e) => this.setState({ backupHourDraft: e.target.value });
+
+  saveBackupSettings = async () => {
+    const { backupEmailDraft, backupFreqDraft, backupHourDraft, settings } = this.state;
+    const email = (backupEmailDraft != null ? backupEmailDraft : (settings.backupEmail || '')).trim();
+    const freq = backupFreqDraft != null ? backupFreqDraft : (settings.backupFreq || 'daily');
+    const hour = parseInt(backupHourDraft != null ? backupHourDraft : (settings.backupHour != null ? settings.backupHour : 8), 10);
+    const db = await this.getDb();
+    await db.collection('settings').doc('main').set({ backupEmail: email, backupFreq: freq, backupHour: hour }, { merge: true });
+    this.setState({ backupSettingsSaved: true });
+    clearTimeout(this._backupSavedT);
+    this._backupSavedT = setTimeout(() => this.setState({ backupSettingsSaved: false }), 3000);
+  };
+
+  isBackupDue(settings) {
+    if (!settings.backupEmail) return false;
+    const now = new Date();
+    const hour = settings.backupHour != null ? settings.backupHour : 8;
+    if (now.getHours() < hour) return false;
+    const last = settings.lastBackupSentAt ? new Date(settings.lastBackupSentAt) : null;
+    if (!last) return true;
+    const days = (now - last) / 86400000;
+    if (settings.backupFreq === 'weekly') return days >= 7;
+    if (settings.backupFreq === 'monthly') return days >= 28;
+    return days >= 1; // daily
+  }
+
+  async maybeSendScheduledBackup(settings, clients, quotes) {
+    if (this._backupCheckDone) return;
+    if (!settings || !this.isBackupDue(settings)) return;
+    this._backupCheckDone = true; // evita reintentos repetidos en la misma sesión
+    const db = await this.getDb();
+    // Marcar primero (evita duplicados si dos pestañas de admin están abiertas a la vez)
+    await db.collection('settings').doc('main').set({ lastBackupSentAt: new Date().toISOString() }, { merge: true });
+    this.sendBackupEmail(settings.backupEmail, clients, quotes);
+  }
+
+  async sendBackupEmail(toEmail, clients, quotes) {
+    if (typeof window.emailjs === 'undefined' || !window.__msfEmailjsConfigured) {
+      console.warn('MSF: falta conectar EmailJS para poder enviar el respaldo por email.');
+      return;
+    }
+    const stamp = new Date().toLocaleDateString('es-AR');
+    const resumen = `Respaldo MSF — ${stamp}\n\nClientes: ${clients.length}\nPresupuestos: ${quotes.length}\n\n` +
+      clients.map(c => `• ${c.nombre} — ${c.email} — ${c.tel || ''}`).join('\n') + '\n\n' +
+      quotes.map(q => `• ${q.tipo} — ${q.fecha ? new Date(q.fecha).toLocaleDateString('es-AR') : ''} — ${q.total ? '$' + q.total : (q.mensaje || '')}`).join('\n');
+    try {
+      await window.emailjs.send(window.__msfEmailjsServiceId, window.__msfEmailjsTemplateId, {
+        to_email: toEmail, subject: `Respaldo MSF — ${stamp}`, message: resumen,
+      });
+    } catch (e) { console.warn('MSF: error enviando respaldo por email', e); }
+  }
+
+  toggleWa1 = async () => {
+    const db = await this.getDb();
+    const cur = (this.state.settings || {}).wa1Active !== false;
+    await db.collection('settings').doc('main').set({ wa1Active: !cur }, { merge: true });
+  };
+
+  toggleWa2 = async () => {
+    const db = await this.getDb();
+    const cur = (this.state.settings || {}).wa2Active !== false;
+    await db.collection('settings').doc('main').set({ wa2Active: !cur }, { merge: true });
+  };
+
+  saveSettings = async () => {
+    const e1 = document.getElementById('settingsWA1');
+    const e2 = document.getElementById('settingsWA2');
+    const num1 = e1 ? e1.value.trim() : '';
+    const num2 = e2 ? e2.value.trim() : '';
+    const db = await this.getDb();
+    await db.collection('settings').doc('main').set({ whatsappNumber1: num1, whatsappNumber2: num2 }, { merge: true });
+    this.setState({ settingsSaved: true });
+    clearTimeout(this._savedT);
+    this._savedT = setTimeout(() => this.setState({ settingsSaved: false }), 3000);
+  };
 
   componentDidMount() {
-    if (localStorage.getItem(this.LS.admin) === '1') this.setState({ authed: true });
-    this.load();
+    if (this.state.authed) this.attachListeners();
   }
 
   doLogin = () => {
@@ -234,7 +768,7 @@ class Component extends DCLogic {
     if (v === this.PASS) {
       localStorage.setItem(this.LS.admin, '1');
       this.setState({ authed: true, loginError: '' });
-      this.load();
+      this.attachListeners();
     } else {
       this.setState({ loginError: 'Clave incorrecta. Probá de nuevo.' });
     }
@@ -244,17 +778,20 @@ class Component extends DCLogic {
 
   doLogout = () => { localStorage.removeItem(this.LS.admin); this.setState({ authed: false }); };
 
-  refresh = () => { this.load(); };
+  refresh = () => { this.setState({ backupMsg: 'Los datos se actualizan solos en tiempo real.', backupOk: true }); clearTimeout(this._backupT); this._backupT = setTimeout(() => this.setState({ backupMsg: '' }), 3000); };
 
   onSearch = (e) => this.setState({ search: e.target.value.toLowerCase() });
 
-  setStatus(id, estado) {
-    const quotes = this.loadJSON(this.LS.quotes).map(q => q.id === id ? { ...q, estado } : q);
-    localStorage.setItem(this.LS.quotes, JSON.stringify(quotes));
-    this.setState({ quotes });
-  }
+  setStatusFilter = (f) => this.setState({ statusFilter: f });
+
+  setStatus = async (id, estado) => {
+    const db = await this.getDb();
+    await db.collection('quotes').doc(id).update({ estado });
+  };
 
   fmt(n) { return '$' + Math.round(n).toLocaleString('es-AR'); }
+
+  val(id) { const e = document.getElementById(id); return e ? e.value.trim() : ''; }
 
   estadoColor(e) { return e === 'Pendiente' ? '#C8102E' : (e === 'Cotizado' ? '#c47f00' : '#1a7a3a'); }
 
@@ -266,13 +803,13 @@ class Component extends DCLogic {
     return { nombre: q.nombre || 'Consulta web', contacto: q.email || '—' };
   }
 
-  seedDemo = () => {
+  seedDemo = async () => {
     const now = Date.now();
     const day = 86400000;
     const clients = [
-      { id: 'demo1', nombre: 'Martín Gómez', empresa: 'Constructora Gómez SRL', tel: '11 4455 6677', email: 'martin@gomezsrl.com', pass: 'demo', createdAt: new Date(now - 9 * day).toISOString() },
-      { id: 'demo2', nombre: 'Laura Fernández', empresa: 'Estudio LF Arquitectura', tel: '11 5566 7788', email: 'laura@lfarq.com', pass: 'demo', createdAt: new Date(now - 6 * day).toISOString() },
-      { id: 'demo3', nombre: 'Diego Sosa', empresa: 'Obra particular', tel: '11 6677 8899', email: 'diego.sosa@mail.com', pass: 'demo', createdAt: new Date(now - 3 * day).toISOString() },
+      { id: 'demo1', nombre: 'Martín Gómez', empresa: 'Constructora Gómez SRL', tel: '11 4455 6677', email: 'martin@gomezsrl.com', pass: 'demo', createdAt: new Date(now - 9 * day).toISOString(), activo: true },
+      { id: 'demo2', nombre: 'Laura Fernández', empresa: 'Estudio LF Arquitectura', tel: '11 5566 7788', email: 'laura@lfarq.com', pass: 'demo', createdAt: new Date(now - 6 * day).toISOString(), activo: true },
+      { id: 'demo3', nombre: 'Diego Sosa', empresa: 'Obra particular', tel: '11 6677 8899', email: 'diego.sosa@mail.com', pass: 'demo', createdAt: new Date(now - 3 * day).toISOString(), activo: true },
     ];
     const quotes = [
       { id: 'dq1', clientId: 'demo1', fecha: new Date(now - 8 * day).toISOString(), tipo: 'Pedido', estado: 'Cerrado', total: 184500, items: [{ name: 'DURLOCK 12.5MM', qty: 6, price: 21000 }, { name: 'MONTANTE 70×35', qty: 18, price: 3200 }] },
@@ -280,13 +817,16 @@ class Component extends DCLogic {
       { id: 'dq3', clientId: 'demo3', fecha: new Date(now - 2 * day).toISOString(), tipo: 'Pedido', estado: 'Pendiente', total: 64000, items: [{ name: 'OSB 11MM', qty: 2, price: 32000 }] },
       { id: 'dq4', clientId: 'demo2', fecha: new Date(now - 1 * day).toISOString(), tipo: 'Consulta', estado: 'Pendiente', nombre: 'Laura Fernández', empresa: 'Estudio LF Arquitectura', email: 'laura@lfarq.com', tel: '11 5566 7788', mensaje: 'Necesito cotizar cielorraso suspendido para 80 m², ¿tienen stock de perfiles?' },
     ];
-    localStorage.setItem(this.LS.clients, JSON.stringify(clients));
-    localStorage.setItem(this.LS.quotes, JSON.stringify(quotes));
-    this.setState({ clients, quotes });
+    const db = await this.getDb();
+    const batch = db.batch();
+    clients.forEach(c => batch.set(db.collection('clients').doc(c.id), c));
+    quotes.forEach(q => batch.set(db.collection('quotes').doc(q.id), q));
+    await batch.commit();
   };
 
   renderVals() {
-    const { authed, loginError, tab, search, clients, quotes } = this.state;
+    const { authed, loginError, tab, search, clients, quotes, settings, settingsSaved, backupMsg, backupOk, backupSettingsSaved, products, productFormOpen, editingProductId } = this.state;
+    const statusFilter = this.state.statusFilter || 'Pendiente';
 
     const pending = quotes.filter(q => q.estado === 'Pendiente').length;
     const value = quotes.filter(q => q.total).reduce((a, q) => a + q.total, 0);
@@ -302,7 +842,13 @@ class Component extends DCLogic {
       return (c.nombre + ' ' + (c.empresa || '') + ' ' + c.email + ' ' + (c.tel || '')).toLowerCase().includes(s);
     };
 
-    const quoteRows = quotes.slice().reverse().filter(matchQ).map(q => {
+    const matchStatus = (q) => statusFilter === 'Todos' || (q.estado || 'Pendiente') === statusFilter;
+    const statusFilters = ['Pendiente', 'Cotizado', 'Cerrado', 'Todos'].map(f => ({
+      key: f, label: f === 'Todos' ? `Todos (${quotes.length})` : `${f} (${quotes.filter(q => (q.estado || 'Pendiente') === f).length})`,
+      bg: statusFilter === f ? '#0a0a0a' : '#fff', color: statusFilter === f ? '#fff' : '#555', border: statusFilter === f ? '#0a0a0a' : '#d8d8d8',
+      onClick: () => this.setStatusFilter(f),
+    }));
+    const quoteRows = quotes.slice().reverse().filter(matchQ).filter(matchStatus).map(q => {
       const cn = this.clientName(q, clients);
       const detalle = q.items ? q.items.map(i => `${i.name} ×${i.qty}`).join(', ') : (q.mensaje || '');
       return {
@@ -319,14 +865,50 @@ class Component extends DCLogic {
       };
     });
 
-    const clientRows = clients.slice().reverse().filter(matchC).map(c => ({
-      initial: (c.nombre || '?').trim().charAt(0).toUpperCase(),
-      nombre: c.nombre,
-      empresa: c.empresa || '—',
-      email: c.email,
-      tel: c.tel || '—',
-      pedidos: quotes.filter(q => q.clientId === c.id).length,
-    }));
+    const editProd = editingProductId ? products.find(p => p.id === editingProductId) : null;
+    const catName = (id) => (this.CATEGORIES.find(c => c.id === id) || {}).name || id;
+    const matchP = (p) => {
+      if (!s) return true;
+      return (p.name + ' ' + (p.spec || '') + ' ' + catName(p.category)).toLowerCase().includes(s);
+    };
+    const productRows = products.slice().filter(matchP).sort((a, b) => catName(a.category).localeCompare(catName(b.category)) || a.name.localeCompare(b.name)).map(p => {
+      const active = p.active !== false;
+      return {
+        id: p.id,
+        img: p.img,
+        noImg: !p.img,
+        name: p.name,
+        spec: p.spec || '',
+        categoryName: catName(p.category),
+        priceFmt: this.fmt(p.price || 0),
+        rowOpacity: active ? 1 : 0.5,
+        estadoLabel: active ? 'Visible' : 'Oculto',
+        estadoColor: active ? '#1a7a3a' : '#999',
+        onToggle: () => this.toggleProductActive(p),
+        onEdit: () => this.editProduct(p),
+        onDelete: () => this.deleteProduct(p),
+      };
+    });
+
+    const clientRows = clients.slice().reverse().filter(matchC).map(c => {
+      const active = c.activo !== false;
+      return {
+        initial: (c.nombre || '?').trim().charAt(0).toUpperCase(),
+        nombre: c.nombre,
+        empresa: c.empresa || '—',
+        email: c.email,
+        tel: c.tel || '—',
+        pedidos: quotes.filter(q => q.clientId === c.id).length,
+        rowOpacity: active ? 1 : 0.5,
+        estadoLabel: active ? 'Alta' : 'Baja',
+        estadoColor: active ? '#1a7a3a' : '#999',
+        btnLabel: active ? 'Dar de baja' : 'Reactivar',
+        btnBg: active ? '#fff' : '#0a0a0a',
+        btnColor: active ? '#C8102E' : '#fff',
+        btnBorder: active ? '#C8102E' : '#0a0a0a',
+        onToggle: () => this.toggleClient(c),
+      };
+    });
 
     return {
       isAuthed: authed,
@@ -347,19 +929,86 @@ class Component extends DCLogic {
 
       tabQuotes: () => this.setState({ tab: 'quotes' }),
       tabClients: () => this.setState({ tab: 'clients' }),
+      tabProducts: () => this.setState({ tab: 'products' }),
+      tabSettings: () => this.setState({ tab: 'settings' }),
       showQuotes: tab === 'quotes',
       showClients: tab === 'clients',
+      showProducts: tab === 'products',
+      showSettings: tab === 'settings',
+      showSearchBar: tab !== 'settings',
+      showSeedDemo: tab === 'quotes' || tab === 'clients',
+      showProductActions: tab === 'products',
       quotesTabColor: tab === 'quotes' ? '#fff' : '#666',
       quotesTabBg: tab === 'quotes' ? '#C8102E' : '#fff',
       clientsTabColor: tab === 'clients' ? '#fff' : '#666',
       clientsTabBg: tab === 'clients' ? '#C8102E' : '#fff',
+      productsTabColor: tab === 'products' ? '#fff' : '#666',
+      productsTabBg: tab === 'products' ? '#C8102E' : '#fff',
+      settingsTabColor: tab === 'settings' ? '#fff' : '#666',
+      settingsTabBg: tab === 'settings' ? '#C8102E' : '#fff',
+      wa1Input: settings.whatsappNumber1 || settings.whatsappNumber || '',
+      wa2Input: settings.whatsappNumber2 || '',
+      wa1ToggleBg: settings.wa1Active !== false ? '#C8102E' : 'rgba(0,0,0,.15)',
+      wa2ToggleBg: settings.wa2Active !== false ? '#C8102E' : 'rgba(0,0,0,.15)',
+      wa1KnobLeft: settings.wa1Active !== false ? '21px' : '3px',
+      wa2KnobLeft: settings.wa2Active !== false ? '21px' : '3px',
+      toggleWa1: this.toggleWa1,
+      toggleWa2: this.toggleWa2,
+      saveSettings: this.saveSettings,
+      settingsSaved,
+      backupMsg,
+      backupMsgColor: backupOk ? '#1a7a3a' : '#C8102E',
+      backupEmailInput: this.state.backupEmailDraft != null ? this.state.backupEmailDraft : (settings.backupEmail || ''),
+      backupFreqInput: this.state.backupFreqDraft != null ? this.state.backupFreqDraft : (settings.backupFreq || 'daily'),
+      backupHourInput: this.state.backupHourDraft != null ? this.state.backupHourDraft : (settings.backupHour != null ? String(settings.backupHour) : '8'),
+      hourOptions: Array.from({ length: 24 }, (_, h) => ({ value: String(h), label: (h < 10 ? '0' + h : h) + ':00 hs' })),
+      onBackupEmailChange: this.onBackupEmailChange,
+      onBackupFreqChange: this.onBackupFreqChange,
+      onBackupHourChange: this.onBackupHourChange,
+      saveBackupSettings: this.saveBackupSettings,
+      backupSettingsSaved,
+      backupStatusText: settings.backupEmail
+        ? (settings.lastBackupSentAt
+            ? `Último envío: ${new Date(settings.lastBackupSentAt).toLocaleString('es-AR')}.`
+            : 'Todavía no se envió ningún respaldo — se enviará según la frecuencia y horario configurados.')
+        : 'Cargá un email para activar el envío automático.',
+      snapshotRows: (this.state.snapshots || []).slice(0, 14).map(snap => ({
+        fecha: new Date(snap.id + 'T12:00:00').toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' }),
+        resumen: `${(snap.clients || []).length} clientes · ${(snap.quotes || []).length} presupuestos`,
+        onRestore: () => this.restoreSnapshot(snap.id, snap),
+      })),
+      hasSnapshots: (this.state.snapshots || []).length > 0,
+      noSnapshots: (this.state.snapshots || []).length === 0,
+      hasPrerestore: this.hasPrerestore(),
+      undoLastRestore: this.undoLastRestore,
+      recoverQuotesFromArchive: this.recoverQuotesFromArchive,
+      archiveCount: quotes.length,
 
       quoteRows,
+      statusFilters,
       hasQuotes: quoteRows.length > 0,
       noQuotes: quoteRows.length === 0,
       clientRows,
       hasClients: clientRows.length > 0,
       noClients: clientRows.length === 0,
+
+      toggleAddProduct: this.toggleAddProduct,
+      cancelProductForm: this.cancelProductForm,
+      saveProduct: this.saveProduct,
+      migrateCatalog: this.migrateCatalog,
+      showAddProductForm: productFormOpen,
+      showMigrate: products.length === 0,
+      productFormTitle: editingProductId ? 'Editar producto' : 'Nuevo producto',
+      categoryOptions: this.CATEGORIES,
+      pfCategoryVal: editProd ? editProd.category : this.CATEGORIES[0].id,
+      pfNameVal: editProd ? editProd.name : '',
+      pfSpecVal: editProd ? editProd.spec : '',
+      pfPriceVal: editProd ? editProd.price : '',
+      pfBadgeVal: editProd ? (editProd.badge || '') : '',
+      pfImgVal: editProd ? editProd.img : '',
+      productRows,
+      hasProducts: productRows.length > 0,
+      noProducts: productRows.length === 0,
     };
   }
 }
